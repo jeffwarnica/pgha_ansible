@@ -1,0 +1,51 @@
+---
+    # The floating virtual IP address; configure clients to target this
+    pgvip: 192.168.123.130
+    # arbitrary name of cluster. 
+    pgClusterName: cfdb
+    
+    # Network address, in CIDR, for both replication and end user ( "cloudforms" user) access
+    access_cidr: 192.168.123.0/24
+    
+    #postgresql user passwords, for replicator and cloudforms accounts
+    replicator_password: password
+    cloudforms_password: password
+    
+    #system passwor for "hacluster" user
+    hacluster_password: password
+    
+    #crypted version of above, use this example to generate
+    #   python -c "from passlib.hash import sha512_crypt; import getpass; print sha512_crypt.encrypt('password')"
+    hacluster_password_crypt: $6$rounds=656000$ThOH0VIGjMdFWqfK$me6Xa2aXW//eaJOgtfOfK5bNGrZVDJOTm8TviQW7U8n2kV2P7TBpPQY6PkjGNQBNXIhgZebWO4bLIezDKEbyZ0 
+    
+    #full nfs path to NFS export
+    nfs_path: 192.168.123.1:/home/pg_wal_archive
+
+
+    #unlikely you need to change below
+    packages:
+      - rh-postgresql94-postgresql 
+      - rh-postgresql94-postgresql-libs 
+      - rh-postgresql94-postgresql-server 
+      - rh-postgresql94-runtime  
+      - rh-postgresql94-postgresql-contrib 
+      - pacemaker 
+      - pcs 
+      - fence-agents-all
+      - nfs-utils
+      #below are necessasry for ansible tasks, but not runtime
+      - python-psycopg2
+      - rsync
+    repos:
+      #likely far more than is strictly necessary
+      - rhel-7-server-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+      - rhel-rs-for-rhel-7-server-eus-rpms
+      - rhel-7-server-eus-rpms
+      - rhel-rs-for-rhel-7-server-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+      - rhel-7-server-aus-rpms
+      - rhel-server-rhscl-7-eus-source-rpms
+      - rhel-server-rhscl-7-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+    

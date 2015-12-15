@@ -1,0 +1,16 @@
+--- 
+- hosts: db
+  vars_files:
+    - vars.yml
+  become: yes
+  name: Setup HA postgresql on the given DB servers
+  tasks:
+    - include: tasks/base_packages.yml
+    - include: tasks/nfs_config.yml
+      tags: nfs
+    - include: tasks/firewall.yml
+      tags: firewall
+    - include: tasks/db_init.yml
+      tags: db
+    - include: tasks/cluster_init.yml 
+      tags: cluster

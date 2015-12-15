@@ -1,0 +1,3 @@
+    - name: DB sync backup to live
+      shell: rsync -arv '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup/' '/var/opt/rh/rh-postgresql94/lib/pgsql/data' 
+      when: ansible_hostname != cluster_master 

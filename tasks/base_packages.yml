@@ -1,0 +1,10 @@
+    - name: Remove all repositories
+      shell:  /usr/sbin/subscription-manager repos --disable \*
+    - name: Add base repositories
+      shell: /usr/sbin/subscription-manager repos --enable {{ item }}
+      with_items: repos
+    - name: install support packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items: packages

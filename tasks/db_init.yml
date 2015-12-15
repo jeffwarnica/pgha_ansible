@@ -1,0 +1,82 @@
+    - name: DB Init Check
+      stat: path=/var/opt/rh/rh-postgresql94/lib/pgsql/data/base
+      register: p_base
+    - name: DB Wrapper Scripts
+      copy: 
+        src: "templates/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        owner: postgres
+        group: postgres
+        mode: 0755 
+      with_items:
+          - pg_ctl
+          - psql
+    - name: DB Init
+      shell:  /opt/rh/rh-postgresql94/root/usr/bin/postgresql-setup --initdb --unit rh-postgresql94-postgresql
+      when: ( ansible_hostname == cluster_master and p_base.stat.exists == false )
+    - name: DB Config Files
+      template:
+        src: templates/{{ item.local }}
+        dest: /var/opt/rh/rh-postgresql94/lib/pgsql/data/{{ item.remote }}
+        owner: postgres
+        group: postgres
+        mode: 0600
+      with_items:
+        - { local: 'pg_hba.conf.j2', remote: 'pg_hba.conf'}
+        - { local: 'postgresql.conf.j2', remote: 'postgresql.conf'}
+      when: ansible_hostname == cluster_master
+    - name: DB Statup for users
+      service:
+        name: rh-postgresql94-postgresql.service
+        state: started
+        enabled: yes
+      when: ansible_hostname == cluster_master
+    - name: DB Cloudforms User
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        # createuser -Pd cloudforms
+        name: cloudforms
+        password: "{{ cloudforms_password }}"
+        role_attr_flags: CREATEDB
+      when: ansible_hostname == cluster_master
+    - name: DB Replicator User
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        name: replicator
+        role_attr_flags: REPLICATION
+        password: "{{ replicator_password }}"
+      when: ansible_hostname == cluster_master
+    - name: DB restart for users
+      service:
+        name: rh-postgresql94-postgresql.service
+        state: restarted
+      when: ansible_hostname == cluster_master
+    - name: DB backup directory, ensure exists
+      file:
+        path: '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup'
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: 0600
+      when: ansible_hostname == cluster_master
+    - name: DB backup directory, clean
+      shell: rm -rf '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup'
+      when: ansible_hostname == cluster_master
+    - name: DB backup for sync
+      become: yes
+      become_user: postgres
+      shell: scl enable rh-postgresql94 '/opt/rh/rh-postgresql94/root/usr/bin/pg_basebackup -D /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup -x'
+      when: ansible_hostname == cluster_master
+    - name: DB shutdown for users
+      service:
+        name: rh-postgresql94-postgresql.service
+        state: stopped
+        enabled: no
+      when: ansible_hostname == cluster_master
+    - name: DB sync backup to live
+      shell: rsync -arv '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup/' '/var/opt/rh/rh-postgresql94/lib/pgsql/data' 
+      when: ansible_hostname != cluster_master
+      
+      

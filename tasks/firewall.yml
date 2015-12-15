@@ -1,0 +1,9 @@
+    - name: Firewall
+      firewalld:
+        service: "{{ item }}"
+        permanent: true 
+        state: enabled
+        immediate: true
+      with_items: 
+        - high-availability
+        - postgresql

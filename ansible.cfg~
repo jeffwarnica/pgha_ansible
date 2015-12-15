@@ -1,0 +1,4 @@
+#:mode=ini:
+[defaults]
+hostfile = inventory
+remote_user = root
