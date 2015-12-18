@@ -8,10 +8,6 @@
         name: pcsd
         state: started
         enabled: yes
-    - name: PCS Cluster Build Vars
-      tags: cluster
-      set_fact:
-        cluster_fqdns: "{% for host in groups['db'] %}{{ hostvars[host]['ansible_fqdn'] }} {% endfor %}"
     - name: PCS Cluster Init On Nodes
       tags: cluster
       shell: pcs cluster setup --start --local --name {{ pgClusterName }} {{ cluster_fqdns }}
@@ -19,7 +15,7 @@
       tags: cluster
       shell: "{{ item }}"
       with_items:
-        - pcs property set no-quorum-policy="ignore"
+        - pcs property set no-quorum-policy="{{quorum_policy}}"
         - pcs property set stonith-enabled="false"
         - pcs resource defaults resource-stickiness="INFINITY"
         - pcs resource defaults migration-threshold="1"
@@ -34,18 +30,25 @@
           repuser=replicator primary_conninfo_opt="password={{ replicator_password }}" node_list="{{ cluster_fqdns }}" \
           restore_command='cp /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{pgClusterName}}/%f "%p"' \
           master_ip={{ pgvip }} tmpdir=/var/opt/rh/rh-postgresql94/lib/pgsql/data/tmp \
-          check_wal_receiver=false restart_on_promote=true \
+          check_wal_receiver=true restart_on_promote=true \
           op start timeout="60s" interval="0s" on-fail="restart" \
           op monitor timeout="60s" interval="4s" on-fail="restart" \
           op monitor timeout="60s" interval="3s" on-fail="restart" role="Master" \
           op promote timeout="60s" interval="0s" on-fail="restart" \
-          op demote timeout="60s" interval="0s" on-fail="stop" \
+          op demote timeout="60s" interval="0s" on-fail="stop" \  
           op stop timeout="60s" interval="0s" \
           op notify timeout="60s" interval="0s" 
-        - pcs resource master msPostgresql pgsql master-max=1 master-node-max=1 clone-max=2 clone-node-max=1 notify=true
+        - pcs resource master msPostgresql pgsql master-max=1 master-node-max=1 clone-max={{ cluster_size }} clone-node-max=1 notify=true
 #        - pcs resource group add master-group {{pgClusterName}}-vip vip-rep
         - pcs constraint colocation add {{pgClusterName}}-vip with Master msPostgresql INFINITY
         - pcs constraint order promote msPostgresql then start {{pgClusterName}}-vip symmetrical=false score=INFINITY
         - pcs constraint order demote  msPostgresql then stop  {{pgClusterName}}-vip symmetrical=false score=0
       when: ansible_hostname == cluster_master 
-    
+    - name: PCS Services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - corosync.service
+        - pacemaker.service

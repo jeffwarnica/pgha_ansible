@@ -1,0 +1,6 @@
+---
+    #Initialize derived variables
+    cluster_master: "{{ groups['db'][0] }}"
+    cluster_fqdns: "{% for host in groups['db'] %}{{ hostvars[host]['ansible_fqdn'] }} {% endfor %}"
+    quorum_policy: "{{ 'ignore' if groups['db']|length <= 2  else 'stop' }}"
+    cluster_size: "{{ groups['db']|length }}"

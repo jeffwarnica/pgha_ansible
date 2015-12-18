@@ -1,6 +1,6 @@
 #:mode=ini:
 
 [db]
-#note: exactly one server must be cluster_master=true, this has no run time implications
-db1 ansible_ssh_host=192.168.123.131 ansible_user=root cluster_master=true
+db1 ansible_ssh_host=192.168.123.131 ansible_user=root
 db2 ansible_ssh_host=192.168.123.132 ansible_user=root
+db3 ansible_ssh_host=192.168.123.133 ansible_user=root
