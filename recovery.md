@@ -28,3 +28,24 @@ lock file to force start.`
 * PG restarts as slave, resyncs
 * **COOL**
 
+# Adding node to cluster
+* Left as excersize of the reader.
+  * pcs cluster node add ...
+  * pcs .... no-quorum-policy=stop
+  * pcs cluster update pgsql ....
+  * pcs cluster update msPostgresql ...
+  * copy data
+  * ...
+  * proft?
+
+# Three node cluster
+
+## Single slave loses connectivity
+
+## *Master* loses connectivity, but slaves keep connectivity to each other
+
+## 3 nodes all lose connectivity to everything at the same time
+
+## Master hard off
+
+## Single slave hard off
