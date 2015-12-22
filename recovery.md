@@ -62,9 +62,22 @@ lock file to force start.`
   * on recovering node: `# rm /var/opt/rh/rh-postgresql94/lib/pgsql/data/tmp/PGSQL.lock`
 
 ## 3 nodes all lose connectivity to everything at the same time
+*????
 
 ## Master hard off
 * vip stops; one slave disconnects; other restarts as master; slave reconnects
 * 
 
 ## Single slave hard off
+* Removed from cluster
+** Restart VM
+* Clean up, rejoins cluster
+ 
+## Both slaves hard off
+* Slaves removed from cluster
+* Remaining node shuts down (no quorum)
+** Restart first ex-slave VM
+* Clean up, rejoins cluster, bunch of postgres start, restart -> One master, one slave
+** Restart second ex-slave VM
+* 3rd vm more quickly rejoins cluster, postgres starts, syncs -> one master, two slaves
+
