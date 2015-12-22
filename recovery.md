@@ -41,11 +41,30 @@ lock file to force start.`
 # Three node cluster
 
 ## Single slave loses connectivity
+* Disconnected node shuts down pgsql
+* Remaining systems continue as-is
+* **RECONNECT**
+* Node rejoins cluster
+* postgres restarted
+* postgres resyncs
 
 ## *Master* loses connectivity, but slaves keep connectivity to each other
+* Disconnected node shuts down postgres, drops VIP 
+* Other nodes quicky decide on new master, 
+* promote/restart postgres on new master
+* starts VIP
+* **RECONNECT**
+*  Node joins cluster, reconfigures postgres as slave
+  * **fails to restart postgres**
+  * pg_log/xxx.log > `FATAL:  could not receive data from WAL stream: ERROR:  requested starting point 0/6000000 is ahead of the WAL flush position of this server 0/50006E0`
+  * on 'master': `# chown postgres.postgres ./tmp/PGSQL.lock`
+  * on recovering node, in `/var/opt/rh/rh-postgresql94/lib/pgsql`:  `# rm -rf data/*; scl enable rh-postgresql94 '/opt/rh/rh-postgresql94/root/usr/bin/pg_basebackup -D data/ -h MASTER_HOST_NAME -U replicator -X stream -P'
+  * on recovering node: `# rm /var/opt/rh/rh-postgresql94/lib/pgsql/data/tmp/PGSQL.lock`
 
 ## 3 nodes all lose connectivity to everything at the same time
 
 ## Master hard off
+* vip stops; one slave disconnects; other restarts as master; slave reconnects
+* 
 
 ## Single slave hard off
