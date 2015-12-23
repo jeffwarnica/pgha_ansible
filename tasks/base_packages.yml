@@ -1,5 +1,3 @@
-    - name: Remove all repositories
-      shell:  /usr/sbin/subscription-manager repos --disable \*
     - name: Add base repositories
       shell: /usr/sbin/subscription-manager repos --enable {{ item }}
       with_items: repos
@@ -7,4 +5,9 @@
       yum:
         name: "{{ item }}"
         state: present
+        enablerepo: "{{repo_list}}"
       with_items: packages
+    - name: selinux
+      selinux: 
+        policy: targeted 
+        state: permissive

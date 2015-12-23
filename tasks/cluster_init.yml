@@ -8,7 +8,7 @@
         name: pcsd
         state: started
         enabled: yes
-    - name: PCS Cluster Init On Nodes
+    - name: PCS Cluster Init
       tags: cluster
       shell: pcs cluster setup --start --local --name {{ pgClusterName }} {{ cluster_fqdns }}
     - name: PCS Cluster Init base config
@@ -25,7 +25,7 @@
           op start   timeout="60s" interval="0s"  on-fail="restart" \
           op monitor timeout="60s" interval="10s" on-fail="restart" \
           op stop    timeout="60s" interval="0s"  on-fail="block" 
-        - pcs resource create pgsql pgsql pgctl=/usr/local/bin/pg_ctl pgdata=/var/opt/rh/rh-postgresql94/lib/pgsql/data 
+        - pcs resource create pgsql pgsql pgctl=/usr/local/bin/pg_ctl pgdata=/var/opt/rh/rh-postgresql94/lib/pgsql/data \
           psql=/usr/local/bin/psql config=/var/opt/rh/rh-postgresql94/lib/pgsql/data/postgresql.conf rep_mode=async \
           repuser=replicator primary_conninfo_opt="password={{ replicator_password }}" node_list="{{ cluster_fqdns }}" \
           restore_command='cp /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{pgClusterName}}/%f "%p"' \

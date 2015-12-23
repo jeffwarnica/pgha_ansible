@@ -60,16 +60,24 @@
         name: rh-postgresql94-postgresql.service
         state: restarted
       when: ansible_hostname == cluster_master
+    - name: DB backup directory, clean
+      shell: rm -rf '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/'
+      when: ansible_hostname == cluster_master
+    - name: DB wal-archive directory
+      file:
+        path: "/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: 0770
+      when: ansible_hostname == cluster_master
     - name: DB backup directory, ensure exists
       file:
         path: '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup'
         state: directory
         owner: postgres
         group: postgres
-        mode: 0600
-      when: ansible_hostname == cluster_master
-    - name: DB backup directory, clean
-      shell: rm -rf '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup'
+        mode: 0770
       when: ansible_hostname == cluster_master
     - name: DB backup for sync
       become: yes
@@ -86,7 +94,13 @@
         path: "/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup/"
       when: ansible_hostname != cluster_master
     - name: DB sync backup to live
-      shell: rsync -arv '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup/' '/var/opt/rh/rh-postgresql94/lib/pgsql/data' 
+      shell: rsync -arv --exclude 'pg_log/*' '/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{ pgClusterName }}/__initial_dist_backup/' '/var/opt/rh/rh-postgresql94/lib/pgsql/data' 
       when: ansible_hostname != cluster_master
-      
+    - name: DB sync perm fix
+      file:
+        path: '/var/opt/rh/rh-postgresql94/lib/pgsql/data' 
+        owner: postgres
+        group: postgres
+        mode: 0700
+      when: ansible_hostname != cluster_master      
       

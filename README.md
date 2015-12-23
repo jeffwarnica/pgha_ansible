@@ -22,6 +22,6 @@ Relevant references:
 
 # TODO
 
-* test n nodes (n>2)
-* test fallback scenarios
 * include archive/cleanup scripts
+* Deal with selinux being enabled (proper labeling of /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive )
+

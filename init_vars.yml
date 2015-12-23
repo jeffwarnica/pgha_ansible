@@ -1,6 +1,34 @@
 ---
+    #System "variables"
+    packages:
+      - rh-postgresql94-postgresql 
+      - rh-postgresql94-postgresql-libs 
+      - rh-postgresql94-postgresql-server 
+      - rh-postgresql94-runtime  
+      - rh-postgresql94-postgresql-contrib 
+      - pacemaker 
+      - pcs 
+      - fence-agents-all
+      - nfs-utils
+      #below are necessasry for ansible tasks, but not runtime
+      - python-psycopg2
+      - rsync
+    repos:
+      #likely far more than is strictly necessary
+      - rhel-7-server-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+      - rhel-rs-for-rhel-7-server-eus-rpms
+      - rhel-7-server-eus-rpms
+      - rhel-rs-for-rhel-7-server-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+      - rhel-7-server-aus-rpms
+      - rhel-server-rhscl-7-eus-source-rpms
+      - rhel-server-rhscl-7-rpms
+      - rhel-ha-for-rhel-7-server-rpms
+    
     #Initialize derived variables
     cluster_master: "{{ groups['db'][0] }}"
     cluster_fqdns: "{% for host in groups['db'] %}{{ hostvars[host]['ansible_fqdn'] }} {% endfor %}"
     quorum_policy: "{{ 'ignore' if groups['db']|length <= 2  else 'stop' }}"
-    cluster_size: "{{ groups['db']|length }}"
+    cluster_size: "{{ groups['db']|length|int}}"
+    repo_list: "{{repos|join(',')}}"
