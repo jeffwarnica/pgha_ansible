@@ -24,7 +24,7 @@ Runit: `ansible-playbook  hadb.yml`
 
 * `crm_mon -Afr` for continious cluster monitoring, `crm_mon -Afr -1` for a one time run
 * `pcs resource cleanup pgsql` as a generic cluster, er, cleanup ad sanity check.
-* Detailed failure and recovery scenarios in: []()
+* Detailed failure and recovery scenarios in: [recovery.md](recovery.md)
 
 Relevant references:
 * https://access.redhat.com/sites/default/files/attachments/cloudforms_ha_master_v4.pdf
@@ -33,6 +33,5 @@ Relevant references:
 
 # TODO
 
-* test n nodes (n>2)
-* test fallback scenarios
+* test more failure/recovery scenarios
 * include archive/cleanup scripts
