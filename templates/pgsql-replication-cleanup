@@ -1,0 +1,15 @@
+#!/bin/bash
+# Delete archived WAL files after N days. This assumes that
+# we take a full backup more often than that.
+set -eu
+# Exit if we are on the standby node. We only need to run the
+# delete command once, and the primary node is the one who writes
+# the files.
+if [ -e /var/opt/rh/rh-postgresql94/lib/pgsql/data/recovery.conf ]; then
+	exit 0
+fi
+
+# The number of days after which archived WAL files will be deleted.
+MAX_AGE=3
+
+su -c "find /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive{{cluster-name}}/ -maxdepth 1 -mtime +$MAX_AGE -type f -delete" postgres
