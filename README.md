@@ -24,7 +24,7 @@ Highly discourage a 2 node cluster.
 
 # Quick start:
 
-Configure *inventory* with a list of hosts and *configurable_vars.yml* in this directory.
+Configure *inventory* with a list of hosts and *configurable_vars.yml* in this directory. The inventory hostnames must match what ansible will disover to be the FQDN of the hosts during its run.
 
 Runit: `ansible-playbook  hadb.yml`
 
