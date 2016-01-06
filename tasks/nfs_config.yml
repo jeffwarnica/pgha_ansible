@@ -5,14 +5,6 @@
         owner: postgres
         group: postgres
         mode: u=rwx,g=,o=
-    - name: NFS Subdir for this cluster
-      file:
-        path: "/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{pgClusterName}}"
-        state: directory
-        owner: postgres
-        group: postgres
-        mode: u=rwx,g=,o=
-      when: ansible_hostname == cluster_master
     - name: NFS Mount Configuration
       mount:
         name: /var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive
@@ -20,3 +12,11 @@
         fstype: nfs
         opts: defaults
         state: mounted
+    - name: NFS Subdir for this cluster
+      file:
+        path: "/var/opt/rh/rh-postgresql94/lib/pgsql/wal-archive/{{pgClusterName}}"
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: u=rwx,g=,o=
+      when: ansible_hostname == cluster_master        
